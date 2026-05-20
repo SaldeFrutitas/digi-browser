@@ -491,7 +491,7 @@ function createTab(
   const faviconImg = document.createElement('img');
 
   faviconImg.className =
-    'shrink-0 w-4 h-4 ml-1 object-contain';
+    'shrink-0 w-4 h-4 object-contain';
 
   faviconImg.src = DEFAULT_FAVICON;
 
@@ -626,8 +626,8 @@ function switchTab(tabId) {
     const isActive = tab.id === tabId;
 
     tab.tabEl.className = isActive
-      ? 'tab active group w-full rounded-xl flex items-center px-1 py-1 gap-3 text-xs cursor-pointer transition-all duration-300 relative bg-blue-200 border border-[#3d3d3d]/10 [-webkit-app-region:no-drag] bg-white text-[#1d1d1d]'
-      : 'tab group w-full rounded-xl flex items-center px-1 py-1 gap-3 text-xs cursor-pointer transition-all duration-300 relative border border-transparent bg-red-500 text-[#868686] hover:bg-[#868686]/10 [-webkit-app-region:no-drag]';
+      ? 'tab active group w-full rounded-xl flex items-center px-1 py-1 gap-3 text-xs cursor-pointer transition-all duration-300 relative border border-[#3d3d3d]/10 [-webkit-app-region:no-drag] bg-white text-[#1d1d1d]'
+      : 'tab group w-full rounded-xl flex items-center px-1 py-1 gap-3 text-xs cursor-pointer transition-all duration-300 relative border border-transparent text-[#868686] hover:bg-[#868686]/10 [-webkit-app-region:no-drag]';
 
     tab.wrapperEl.classList.toggle(
       'hidden',
@@ -701,7 +701,7 @@ function applySidebarState(state) {
 
   sidebar.classList.remove(
     'w-[165px]',
-    'w-10',
+    'w-8',
     'w-0',
     'h-full',
     'pl-2',
@@ -715,7 +715,8 @@ function applySidebarState(state) {
     sidebar.classList.add(
       'w-[165px]',
       'h-full',
-      'pl-2'
+      'pl-0',
+      'ml-1'
     );
 
   }
@@ -723,9 +724,10 @@ function applySidebarState(state) {
   else if (state === 'icons-only') {
 
     sidebar.classList.add(
-      'w-10',
+      'w-8',
       'h-full',
-      'pl-2'
+      'pl-0',
+      'ml-1'
     );
 
   }

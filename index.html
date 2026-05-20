@@ -193,12 +193,13 @@
 
       <!-- ─── Sidebar ─── -->
       <div id="sidebar"
-        class="h-full flex flex-col pt-2 pl-2 gap-2 bg-[var(--bg)] [-webkit-app-region:drag] overflow-hidden transition-all duration-300 ease-in-out w-[165px]">
+        class="h-full flex flex-col pt-2 gap-2 [-webkit-app-region:drag] overflow-hidden transition-all duration-300 ease-in-out w-[165px]">
 
-        <div id="tabs-container" class="flex flex-col w-full gap-1"></div>
+        <div id="tabs-container" class="flex flex-col w-full"></div>
 
         <button id="new-tab-btn"
-          class="bg-transparent border border-dashed border-[#868686]/40 text-[#868686] w-full h-9 rounded-lg flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-[#868686]/10 hover:text-[#F83B66] hover:border-[#F83B66]/40 active:scale-95 [-webkit-app-region:no-drag]"
+          class="bg-transparent flex  border border-dashed border-[#868686]/40 text-[#868686] w-full h-7 rounded-xl p-1 px-1
+          flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-[#868686]/10 hover:text-[#F83B66] hover:border-[#F83B66]/40 active:scale-95 [-webkit-app-region:no-drag]"
           title="New Tab">
 
           <svg viewBox="0 0 24 24"
@@ -221,7 +222,7 @@
       </div>
 
       <!-- BrowserView -->
-      <div class="flex-1 pr-1 ml-1 pb-1 bg-[var(--bg)] flex flex-col"
+      <div class="flex-1 pr-1 pb-1 bg-[var(--bg)] flex flex-col"
         id="webviews-container">
       </div>
 
