@@ -286,6 +286,9 @@
   .ml-1 {
     margin-left: calc(var(--spacing) * 1);
   }
+  .ml-0 {
+    margin-left: calc(var(--spacing) * 0);
+  }
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
   }
@@ -331,6 +334,9 @@
   .h-10 {
     height: calc(var(--spacing) * 10);
   }
+  .h-8 {
+    height: calc(var(--spacing) * 8);
+  }
   .h-\[calc\(100\%-16px\)\] {
     height: calc(100% - 16px);
   }
@@ -360,6 +366,9 @@
   }
   .w-10 {
     width: calc(var(--spacing) * 10);
+  }
+  .w-8 {
+    width: calc(var(--spacing) * 8);
   }
   .w-40 {
     width: calc(var(--spacing) * 40);
@@ -533,6 +542,9 @@
   }
   .px-8 {
     padding-inline: calc(var(--spacing) * 8);
+  }
+  .p-1 {
+    padding: calc(var(--spacing) * 1);
   }
   .py-1 {
     padding-block: calc(var(--spacing) * 1);
@@ -822,6 +834,20 @@
     color: var(--color-slate-100);
     -webkit-user-select: none;
     user-select: none;
+  }
+  ::-webkit-scrollbar {
+    width: calc(var(--spacing) * 0.5);
+    height: calc(var(--spacing) * 0.5);
+  }
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: color-mix(in oklab, #868686 30%, transparent);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklab, #868686 50%, transparent);
   }
 }
 @property --tw-rotate-x {

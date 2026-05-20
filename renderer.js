@@ -337,9 +337,38 @@ const DEFAULT_FAVICON =
   '<path d="M12 2a15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10"></path>' +
   '</svg>';
 
+const WEBVIEW_SCROLLBAR_CSS = `
+  ::-webkit-scrollbar {
+    width: 8px !important;
+    background: white !important;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: white !important;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 9999px !important;
+    background: rgba(134, 134, 134, 0.45) !important;
+
+    /* thinner thumb */
+    border: 2px solid white !important;
+    background-clip: content-box !important;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(134, 134, 134, 0.65) !important;
+    background-clip: content-box !important;
+  }
+`;
+
 function setupWebviewEvents(tab) {
 
   const wv = tab.webviewEl;
+
+  wv.addEventListener('dom-ready', () => {
+    wv.insertCSS(WEBVIEW_SCROLLBAR_CSS).catch(() => {});
+  });
 
   wv.addEventListener('did-start-navigation', (e) => {
 
@@ -428,7 +457,11 @@ function setupWebviewEvents(tab) {
 
   wv.addEventListener('new-window', (e) => {
 
-    createTab(e.url);
+    e.preventDefault();
+
+    if (e.url) {
+      createTab(e.url);
+    }
 
   });
 
@@ -593,8 +626,8 @@ function switchTab(tabId) {
     const isActive = tab.id === tabId;
 
     tab.tabEl.className = isActive
-      ? 'tab active group w-full rounded-xl flex items-center px-8 py-1 gap-3 text-xs cursor-pointer transition-all duration-300 relative border border-[#3d3d3d]/10 [-webkit-app-region:no-drag] bg-white text-[#1d1d1d]'
-      : 'tab group w-full rounded-xl flex items-center px-1 py-1 gap-3 text-xs cursor-pointer transition-all duration-300 relative border border-transparent bg-transparent text-[#868686] hover:bg-[#868686]/10 [-webkit-app-region:no-drag]';
+      ? 'tab active group w-full rounded-xl flex items-center px-1 py-1 gap-3 text-xs cursor-pointer transition-all duration-300 relative bg-blue-200 border border-[#3d3d3d]/10 [-webkit-app-region:no-drag] bg-white text-[#1d1d1d]'
+      : 'tab group w-full rounded-xl flex items-center px-1 py-1 gap-3 text-xs cursor-pointer transition-all duration-300 relative border border-transparent bg-red-500 text-[#868686] hover:bg-[#868686]/10 [-webkit-app-region:no-drag]';
 
     tab.wrapperEl.classList.toggle(
       'hidden',
@@ -602,6 +635,10 @@ function switchTab(tabId) {
     );
 
   });
+
+  if (SIDEBAR_STATES[currentSidebarState] === 'icons-only') {
+    applySidebarState('icons-only');
+  }
 
   syncUrl(targetTab.url);
 
@@ -731,17 +768,17 @@ function applySidebarState(state) {
     );
 
     tab.classList.toggle(
-      'px-0',
+      'p-1',
       iconsOnly
     );
 
     tab.classList.toggle(
-      'w-10',
+      'w-8',
       iconsOnly
     );
 
     tab.classList.toggle(
-      'h-10',
+      'h-8',
       iconsOnly
     );
 
@@ -750,7 +787,7 @@ function applySidebarState(state) {
     if (img) {
 
       img.classList.toggle(
-        'mr-0',
+        'ml-0',
         iconsOnly
       );
 
@@ -772,17 +809,17 @@ function applySidebarState(state) {
   );
 
   newTabBtn.classList.toggle(
-    'px-0',
+    'p-1',
     iconsOnly
   );
 
   newTabBtn.classList.toggle(
-    'w-10',
+    'w-8',
     iconsOnly
   );
 
   newTabBtn.classList.toggle(
-    'h-10',
+    'h-8',
     iconsOnly
   );
 
@@ -942,6 +979,10 @@ if (
 
 newTabBtn?.addEventListener('click', () => {
   createTab();
+});
+
+window.browserAPI?.onOpenNewTab?.((url) => {
+  createTab(url);
 });
 
 applySidebarState('expanded');

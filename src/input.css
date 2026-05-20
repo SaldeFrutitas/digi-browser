@@ -20,4 +20,20 @@
   body {
     @apply bg-transparent text-slate-100 overflow-hidden h-screen select-none;
   }
+
+  ::-webkit-scrollbar {
+    @apply w-0.5 h-0.5;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-[#868686]/30;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-[#868686]/50;
+  }
 }

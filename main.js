@@ -96,6 +96,26 @@ function createWindow() {
 }
 
 // ─── Window Controls (Registered Globally Once) ───
+app.on('web-contents-created', (_event, contents) => {
+  if (contents.getType() !== 'webview') {
+    return;
+  }
+
+  contents.setWindowOpenHandler(({ url }) => {
+    const safeUrl = sanitizeUrl(url);
+
+    if (
+      safeUrl &&
+      mainWindow &&
+      !mainWindow.isDestroyed()
+    ) {
+      mainWindow.webContents.send('open-new-tab', safeUrl);
+    }
+
+    return { action: 'deny' };
+  });
+});
+
 ipcMain.on('window-minimize', () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.minimize();
@@ -121,4 +141,3 @@ ipcMain.on('window-close', () => {
 app.whenReady().then(createWindow);
 app.on('window-all-closed', () => process.platform !== 'darwin' && app.quit());
 app.on('activate', () => BrowserWindow.getAllWindows().length === 0 && createWindow());
-

@@ -27,5 +27,6 @@ contextBridge.exposeInMainWorld('browserAPI', {
   onDidStartLoading: (cb) => ipcRenderer.on('did-start-loading', cb),
   onDidStopLoading:  (cb) => ipcRenderer.on('did-stop-loading',  cb),
   onWindowState:     (cb) => ipcRenderer.on('window-state',     (_, state)   => cb(String(state))),
+  onOpenNewTab:      (cb) => ipcRenderer.on('open-new-tab',     (_, url)     => cb(String(url))),
 });
 
