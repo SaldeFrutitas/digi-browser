@@ -1,0 +1,23 @@
+﻿@import "tailwindcss";
+
+@theme {
+  --bg: #EDEDED;
+  --color-bg-surface: rgba(15, 23, 42, 0.7);
+  --color-accent: #38bdf8;
+  --color-accent-glow: rgba(56, 189, 248, 0.3);
+  --color-border-glass: rgba(255, 255, 255, 0.08);
+
+  --spacing-toolbar: 52px;
+  --spacing-tabs: 40px;
+}
+
+@layer base {
+  * {
+    @apply box-border m-0 p-0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    @apply bg-transparent text-slate-100 overflow-hidden h-screen select-none;
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "name": "digi-browser",
+  "version": "1.0.0",
+  "description": "A custom web browser built with Electron",
+  "author": "Digi Browser",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:css": "tailwindcss -i ./src/input.css -o ./style.css",
+    "watch:css": "tailwindcss -i ./src/input.css -o ./style.css --watch",
+    "dev": "start /B npm run watch:css & npm run start",
+    "dist": "npm run build:css && electron-builder --win"
+  },
+  "build": {
+    "appId": "com.digibrowser.app",
+    "productName": "Digi Browser",
+    "copyright": "Copyright © 2026",
+    "asar": true,
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "index.html",
+      "style.css",
+      "assets/**",
+      "build/**",
+      "src/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Digi Browser"
+    }
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.2.4",
+    "concurrently": "^9.2.1",
+    "electron": "^28.3.3",
+    "electron-builder": "^26.8.1",
+    "png-to-ico": "^3.0.1",
+    "tailwindcss": "^4.2.4"
+  }
+}
