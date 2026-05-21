@@ -1,4 +1,4 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 @theme {
   --bg: #EDEDED;
@@ -82,8 +82,8 @@
 .is-floating {
   left: 0 !important; /* Pegada al borde izquierdo */
   top: 0 !important;
-  height: 100% !important; /* Ocupa el 100% de la altura */
-  border-radius: 0 16px 16px 0 !important; /* Redondeada solo a la derecha */
+  height: 98% !important;
+  border-radius: 16px !important;
   background-color: rgba(255, 255, 255, 0.7) !important; /* Fondo translúcido blanco */
   backdrop-filter: blur(12px) !important; /* blur-md */
   -webkit-backdrop-filter: blur(12px) !important;

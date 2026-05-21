@@ -9,6 +9,7 @@
       "Courier New", monospace;
     --color-slate-100: oklch(96.8% 0.007 247.896);
     --color-slate-400: oklch(70.4% 0.04 256.788);
+    --color-black: #000;
     --color-white: #fff;
     --spacing: 0.25rem;
     --container-3xl: 48rem;
@@ -21,6 +22,7 @@
     --radius-2xl: 1rem;
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --animate-pulse: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --blur-md: 12px;
     --default-transition-duration: 150ms;
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-sans);
@@ -198,17 +200,11 @@
   .top-0 {
     top: calc(var(--spacing) * 0);
   }
-  .top-2 {
-    top: calc(var(--spacing) * 2);
-  }
   .bottom-0 {
     bottom: calc(var(--spacing) * 0);
   }
   .left-0 {
     left: calc(var(--spacing) * 0);
-  }
-  .left-2 {
-    left: calc(var(--spacing) * 2);
   }
   .isolate {
     isolation: isolate;
@@ -227,6 +223,9 @@
   }
   .mr-1 {
     margin-right: calc(var(--spacing) * 1);
+  }
+  .mb-2 {
+    margin-bottom: calc(var(--spacing) * 2);
   }
   .ml-0 {
     margin-left: calc(var(--spacing) * 0);
@@ -260,9 +259,6 @@
   }
   .h-8 {
     height: calc(var(--spacing) * 8);
-  }
-  .h-\[calc\(100\%-16px\)\] {
-    height: calc(100% - 16px);
   }
   .h-auto {
     height: auto;
@@ -378,6 +374,10 @@
   .rounded-xl {
     border-radius: var(--radius-xl);
   }
+  .rounded-r-2xl {
+    border-top-right-radius: var(--radius-2xl);
+    border-bottom-right-radius: var(--radius-2xl);
+  }
   .rounded-b-lg {
     border-bottom-right-radius: var(--radius-lg);
     border-bottom-left-radius: var(--radius-lg);
@@ -389,6 +389,10 @@
   .border-\[2px\] {
     border-style: var(--tw-border-style);
     border-width: 2px;
+  }
+  .border-r {
+    border-right-style: var(--tw-border-style);
+    border-right-width: 1px;
   }
   .border-dashed {
     --tw-border-style: dashed;
@@ -407,14 +411,14 @@
   .border-\[\#868686\]\/40 {
     border-color: color-mix(in oklab, #868686 40%, transparent);
   }
+  .border-black\/5 {
+    border-color: color-mix(in srgb, #000 5%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-black) 5%, transparent);
+    }
+  }
   .border-transparent {
     border-color: transparent;
-  }
-  .border-white\/15 {
-    border-color: color-mix(in srgb, #fff 15%, transparent);
-    @supports (color: color-mix(in lab, red, red)) {
-      border-color: color-mix(in oklab, var(--color-white) 15%, transparent);
-    }
   }
   .bg-\[\#F83B66\] {
     background-color: #F83B66;
@@ -433,6 +437,12 @@
   }
   .bg-white {
     background-color: var(--color-white);
+  }
+  .bg-white\/70 {
+    background-color: color-mix(in srgb, #fff 70%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-white) 70%, transparent);
+    }
   }
   .object-contain {
     object-fit: contain;
@@ -460,6 +470,9 @@
   }
   .pb-1 {
     padding-bottom: calc(var(--spacing) * 1);
+  }
+  .pb-2 {
+    padding-bottom: calc(var(--spacing) * 2);
   }
   .pl-0 {
     padding-left: calc(var(--spacing) * 0);
@@ -517,8 +530,8 @@
   .opacity-100 {
     opacity: 100%;
   }
-  .shadow-\[0_10px_25px_-5px_rgba\(248\,59\,102\,0\.4\)\,0_8px_10px_-6px_rgba\(248\,59\,102\,0\.4\)\] {
-    --tw-shadow: 0 10px 25px -5px var(--tw-shadow-color, rgba(248,59,102,0.4)), 0 8px 10px -6px var(--tw-shadow-color, rgba(248,59,102,0.4));
+  .shadow-\[4px_0_24px_rgba\(0\,0\,0\,0\.12\)\] {
+    --tw-shadow: 4px 0 24px var(--tw-shadow-color, rgba(0,0,0,0.12));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
   }
   .blur {
@@ -535,6 +548,11 @@
   }
   .filter {
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  }
+  .backdrop-blur-md {
+    --tw-backdrop-blur: blur(var(--blur-md));
+    -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+    backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
   }
   .transition-all {
     transition-property: all;
@@ -731,6 +749,49 @@
     background-color: color-mix(in oklab, #868686 50%, transparent);
   }
 }
+#tabs-container {
+  flex: 0 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+}
+#tabs-container::-webkit-scrollbar {
+  width: 3px;
+}
+#tabs-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+#tabs-container::-webkit-scrollbar-thumb {
+  background: rgba(134, 134, 134, 0.2);
+  border-radius: 99px;
+}
+#tabs-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(134, 134, 134, 0.4);
+}
+.w-8 #tabs-container::-webkit-scrollbar {
+  display: none;
+}
+#new-tab-btn {
+  margin-bottom: 8px;
+}
+#sidebar-hover-zone {
+  width: 10px !important;
+}
+.is-floating {
+  left: 0 !important;
+  top: 0 !important;
+  height: 98% !important;
+  border-radius: 16px !important;
+  background-color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.08) !important;
+  -webkit-app-region: no-drag !important;
+}
 @property --tw-rotate-x {
   syntax: "*";
   inherits: false;
@@ -878,6 +939,42 @@
   syntax: "*";
   inherits: false;
 }
+@property --tw-backdrop-blur {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-brightness {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-contrast {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-grayscale {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-hue-rotate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-invert {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-opacity {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-saturate {
+  syntax: "*";
+  inherits: false;
+}
+@property --tw-backdrop-sepia {
+  syntax: "*";
+  inherits: false;
+}
 @property --tw-duration {
   syntax: "*";
   inherits: false;
@@ -943,6 +1040,15 @@
       --tw-drop-shadow-color: initial;
       --tw-drop-shadow-alpha: 100%;
       --tw-drop-shadow-size: initial;
+      --tw-backdrop-blur: initial;
+      --tw-backdrop-brightness: initial;
+      --tw-backdrop-contrast: initial;
+      --tw-backdrop-grayscale: initial;
+      --tw-backdrop-hue-rotate: initial;
+      --tw-backdrop-invert: initial;
+      --tw-backdrop-opacity: initial;
+      --tw-backdrop-saturate: initial;
+      --tw-backdrop-sepia: initial;
       --tw-duration: initial;
       --tw-ease: initial;
       --tw-scale-x: 1;
@@ -951,63 +1057,3 @@
     }
   }
 }
-
-/* ─── Scrollable Tab Container ─── */
-#tabs-container {
-  flex: 0 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding-right: 2px;
-}
-
-/* Custom premium scrollbar for tabs container when expanded */
-#tabs-container::-webkit-scrollbar {
-  width: 3px;
-}
-
-#tabs-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-#tabs-container::-webkit-scrollbar-thumb {
-  background: rgba(134, 134, 134, 0.2);
-  border-radius: 99px;
-}
-
-#tabs-container::-webkit-scrollbar-thumb:hover {
-  background: rgba(134, 134, 134, 0.4);
-}
-
-/* Hide scrollbar when sidebar is in icons-only state */
-.w-8 #tabs-container::-webkit-scrollbar {
-  display: none;
-}
-
-#new-tab-btn {
-  margin-bottom: 8px; /* Matches Tailwind's mb-2 */
-}
-
-/* Premium edge-hover zone width */
-#sidebar-hover-zone {
-  width: 10px !important;
-}
-
-/* Custom Premium Floating Sidebar Override */
-.is-floating {
-  left: -2px !important; /* Pegada al borde izquierdo */
-  top: 0.3% !important;
-  height: 98.9% !important; /* Ocupa el 100% de la altura */
-  border-radius: 14px !important; /* Redondeada solo a la derecha */
-  background-color: rgba(255, 255, 255, 0.695) !important; /* Fondo translúcido blanco */
-  backdrop-filter: blur(8px) !important; /* blur-md */
-  -webkit-backdrop-filter: blur(8px) !important;
-  border-top: none !important;
-  border-bottom: none !important;
-  border-left: none !important;
-  box-shadow: 4px 0 5px rgba(0, 0, 0, 0.08) !important; /* Sombra sutil hacia la derecha */
-  -webkit-app-region: no-drag !important; /* Solución definitiva al bug de Electron (evita falsos mouseleave al pasar por botones) */
-}
-
-
-
-
