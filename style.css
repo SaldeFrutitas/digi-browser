@@ -7,8 +7,6 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
-    --color-red-500: oklch(63.7% 0.237 25.331);
-    --color-blue-200: oklch(88.2% 0.059 254.128);
     --color-slate-100: oklch(96.8% 0.007 247.896);
     --color-slate-400: oklch(70.4% 0.04 256.788);
     --color-white: #fff;
@@ -651,6 +649,13 @@
       }
     }
   }
+  .hover\:bg-\[\#ffffff\] {
+    &:hover {
+      @media (hover: hover) {
+        background-color: #ffffff;
+      }
+    }
+  }
   .hover\:bg-\[\#ffffff\]\/90 {
     &:hover {
       @media (hover: hover) {
@@ -946,3 +951,63 @@
     }
   }
 }
+
+/* ─── Scrollable Tab Container ─── */
+#tabs-container {
+  flex: 0 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+}
+
+/* Custom premium scrollbar for tabs container when expanded */
+#tabs-container::-webkit-scrollbar {
+  width: 3px;
+}
+
+#tabs-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#tabs-container::-webkit-scrollbar-thumb {
+  background: rgba(134, 134, 134, 0.2);
+  border-radius: 99px;
+}
+
+#tabs-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(134, 134, 134, 0.4);
+}
+
+/* Hide scrollbar when sidebar is in icons-only state */
+.w-8 #tabs-container::-webkit-scrollbar {
+  display: none;
+}
+
+#new-tab-btn {
+  margin-bottom: 8px; /* Matches Tailwind's mb-2 */
+}
+
+/* Premium edge-hover zone width */
+#sidebar-hover-zone {
+  width: 10px !important;
+}
+
+/* Custom Premium Floating Sidebar Override */
+.is-floating {
+  left: -2px !important; /* Pegada al borde izquierdo */
+  top: 0.3% !important;
+  height: 98.9% !important; /* Ocupa el 100% de la altura */
+  border-radius: 14px !important; /* Redondeada solo a la derecha */
+  background-color: rgba(255, 255, 255, 0.695) !important; /* Fondo translúcido blanco */
+  backdrop-filter: blur(8px) !important; /* blur-md */
+  -webkit-backdrop-filter: blur(8px) !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  box-shadow: 4px 0 5px rgba(0, 0, 0, 0.08) !important; /* Sombra sutil hacia la derecha */
+  -webkit-app-region: no-drag !important; /* Solución definitiva al bug de Electron (evita falsos mouseleave al pasar por botones) */
+}
+
+
+
+

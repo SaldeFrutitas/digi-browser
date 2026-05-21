@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 
 @theme {
   --bg: #EDEDED;
@@ -37,3 +37,64 @@
     @apply bg-[#868686]/50;
   }
 }
+
+/* ─── Scrollable Tab Container ─── */
+#tabs-container {
+  flex: 0 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 2px;
+}
+
+/* Custom premium scrollbar for tabs container when expanded */
+#tabs-container::-webkit-scrollbar {
+  width: 3px;
+}
+
+#tabs-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#tabs-container::-webkit-scrollbar-thumb {
+  background: rgba(134, 134, 134, 0.2);
+  border-radius: 99px;
+}
+
+#tabs-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(134, 134, 134, 0.4);
+}
+
+/* Hide scrollbar when sidebar is in icons-only state */
+.w-8 #tabs-container::-webkit-scrollbar {
+  display: none;
+}
+
+#new-tab-btn {
+  margin-bottom: 8px; /* Matches Tailwind's mb-2 */
+}
+
+/* Premium edge-hover zone width */
+#sidebar-hover-zone {
+  width: 10px !important;
+}
+
+/* Custom Premium Floating Sidebar Override */
+.is-floating {
+  left: 0 !important; /* Pegada al borde izquierdo */
+  top: 0 !important;
+  height: 100% !important; /* Ocupa el 100% de la altura */
+  border-radius: 0 16px 16px 0 !important; /* Redondeada solo a la derecha */
+  background-color: rgba(255, 255, 255, 0.7) !important; /* Fondo translúcido blanco */
+  backdrop-filter: blur(12px) !important; /* blur-md */
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important; /* Solo borde a la derecha */
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.08) !important; /* Sombra sutil hacia la derecha */
+  -webkit-app-region: no-drag !important; /* Solución definitiva al bug de Electron (evita falsos mouseleave al pasar por botones) */
+}
+
+
+
+

@@ -337,37 +337,37 @@ const DEFAULT_FAVICON =
   '<path d="M12 2a15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10"></path>' +
   '</svg>';
 
-const WEBVIEW_SCROLLBAR_CSS = `
-  ::-webkit-scrollbar {
-    width: 8px !important;
-    background: white !important;
-  }
+// const WEBVIEW_SCROLLBAR_CSS = `
+//   ::-webkit-scrollbar {
+//     width: 8px !important;
+//     background: white !important;
+//   }
 
-  ::-webkit-scrollbar-track {
-    background: white !important;
-  }
+//   ::-webkit-scrollbar-track {
+//     background: white !important;
+//   }
 
-  ::-webkit-scrollbar-thumb {
-    border-radius: 9999px !important;
-    background: rgba(134, 134, 134, 0.45) !important;
+//   ::-webkit-scrollbar-thumb {
+//     border-radius: 9999px !important;
+//     background: rgba(134, 134, 134, 0.45) !important;
 
-    /* thinner thumb */
-    border: 2px solid white !important;
-    background-clip: content-box !important;
-  }
+//     /* thinner thumb */
+//     border: 2px solid white !important;
+//     background-clip: content-box !important;
+//   }
 
-  ::-webkit-scrollbar-thumb:hover {
-    background: rgba(134, 134, 134, 0.65) !important;
-    background-clip: content-box !important;
-  }
-`;
+//   ::-webkit-scrollbar-thumb:hover {
+//     background: rgba(134, 134, 134, 0.65) !important;
+//     background-clip: content-box !important;
+//   }
+// `;
 
 function setupWebviewEvents(tab) {
 
   const wv = tab.webviewEl;
 
   wv.addEventListener('dom-ready', () => {
-    wv.insertCSS(WEBVIEW_SCROLLBAR_CSS).catch(() => {});
+    wv.insertCSS(WEBVIEW_SCROLLBAR_CSS).catch(() => { });
   });
 
   wv.addEventListener('did-start-navigation', (e) => {
@@ -645,6 +645,8 @@ function switchTab(tabId) {
   document.title =
     `${targetTab.titleSpan.textContent} - Digi Browser`;
 
+  targetTab.tabEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
 }
 
 function closeTab(tabId) {
@@ -784,6 +786,7 @@ function applySidebarState(state) {
       iconsOnly
     );
 
+
     const img = tab.querySelector('img');
 
     if (img) {
@@ -869,21 +872,58 @@ toggleSidebarBtn?.addEventListener('click', () => {
 const FLOATING_CLASSES = [
   'is-floating',
   'absolute',
-  'left-2',
-  'top-2',
+  'left-0',
+  'top-0',
   'z-40',
   'w-40',
-  'h-[calc(100%-16px)]',
+  'h-full',
   'opacity-100',
   'pointer-events-auto',
   'px-2',
   'py-3',
-  'shadow-[0_10px_25px_-5px_rgba(248,59,102,0.4),0_8px_10px_-6px_rgba(248,59,102,0.4)]',
-  'bg-brand',
-  'rounded-2xl',
-  'border',
-  'border-white/15'
+  'shadow-[4px_0_24px_rgba(0,0,0,0.12)]',
+  'bg-white/70',
+  'backdrop-blur-md',
+  'rounded-r-2xl',
+  'border-r',
+  'border-black/5'
 ];
+
+let floatingTimeout = null;
+let closeTimeout = null;
+
+function closeFloatingSidebar() {
+
+  if (
+    !sidebar.classList.contains(
+      'is-floating'
+    )
+  ) {
+    return;
+  }
+
+  sidebar.classList.remove(
+    ...FLOATING_CLASSES
+  );
+
+  sidebar.classList.add(
+    'w-0',
+    'pl-0',
+    'opacity-0',
+    'pointer-events-none'
+  );
+
+  if (floatingTimeout) {
+    clearTimeout(floatingTimeout);
+    floatingTimeout = null;
+  }
+
+  if (closeTimeout) {
+    clearTimeout(closeTimeout);
+    closeTimeout = null;
+  }
+
+}
 
 hoverZone?.addEventListener('mouseenter', () => {
 
@@ -891,9 +931,15 @@ hoverZone?.addEventListener('mouseenter', () => {
     SIDEBAR_STATES[currentSidebarState] !==
     'hidden'
   ) {
-
     return;
+  }
 
+  if (floatingTimeout) {
+    clearTimeout(floatingTimeout);
+  }
+  
+  if (closeTimeout) {
+    clearTimeout(closeTimeout);
   }
 
   sidebar.classList.remove(
@@ -906,6 +952,34 @@ hoverZone?.addEventListener('mouseenter', () => {
   sidebar.classList.add(
     ...FLOATING_CLASSES
   );
+
+  // Close sidebar if mouse doesn't enter it within 800ms
+  floatingTimeout = setTimeout(() => {
+    closeFloatingSidebar();
+  }, 800);
+
+});
+
+sidebar?.addEventListener('mouseenter', () => {
+
+  if (
+    !sidebar.classList.contains(
+      'is-floating'
+    )
+  ) {
+    return;
+  }
+
+  // Clear timeouts since user successfully hovered inside the sidebar!
+  if (floatingTimeout) {
+    clearTimeout(floatingTimeout);
+    floatingTimeout = null;
+  }
+
+  if (closeTimeout) {
+    clearTimeout(closeTimeout);
+    closeTimeout = null;
+  }
 
 });
 
@@ -916,21 +990,17 @@ sidebar?.addEventListener('mouseleave', () => {
       'is-floating'
     )
   ) {
-
     return;
-
   }
 
-  sidebar.classList.remove(
-    ...FLOATING_CLASSES
-  );
-
-  sidebar.classList.add(
-    'w-0',
-    'pl-0',
-    'opacity-0',
-    'pointer-events-none'
-  );
+  // Accidental leave buffer of 400ms
+  if (closeTimeout) {
+    clearTimeout(closeTimeout);
+  }
+  
+  closeTimeout = setTimeout(() => {
+    closeFloatingSidebar();
+  }, 400);
 
 });
 
