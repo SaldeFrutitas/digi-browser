@@ -778,18 +778,17 @@
   width: 10px !important;
 }
 .is-floating {
-  left: 0 !important;
-  top: 0 !important;
-  height: 98% !important;
-  border-radius: 16px !important;
-  background-color: rgba(255, 255, 255, 0.7) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+  left: -2px !important;
+  top: 2px !important;
+  height: 99% !important;
+  border-radius: 12px !important;
+  background-color: rgba(255, 255, 255, 0.76) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   border-top: none !important;
   border-bottom: none !important;
   border-left: none !important;
-  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 4px 0 5px rgba(0, 0, 0, 0.08) !important;
   -webkit-app-region: no-drag !important;
 }
 @property --tw-rotate-x {

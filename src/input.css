@@ -80,19 +80,18 @@
 
 /* Custom Premium Floating Sidebar Override */
 .is-floating {
-  left: 0 !important; /* Pegada al borde izquierdo */
-  top: 0 !important;
-  height: 98% !important;
-  border-radius: 16px !important;
-  background-color: rgba(255, 255, 255, 0.7) !important; /* Fondo translúcido blanco */
-  backdrop-filter: blur(12px) !important; /* blur-md */
-  -webkit-backdrop-filter: blur(12px) !important;
-  border-right: 1px solid rgba(0, 0, 0, 0.08) !important; /* Solo borde a la derecha */
+  left: -2px !important;
+  top: 2px !important;
+  height: 99% !important;
+  border-radius: 12px !important;
+  background-color: rgba(255, 255, 255, 0.777) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
   border-top: none !important;
   border-bottom: none !important;
   border-left: none !important;
-  box-shadow: 4px 0 25px rgba(0, 0, 0, 0.08) !important; /* Sombra sutil hacia la derecha */
-  -webkit-app-region: no-drag !important; /* Solución definitiva al bug de Electron (evita falsos mouseleave al pasar por botones) */
+  box-shadow: 4px 0 5px rgba(0, 0, 0, 0.08) !important;
+  -webkit-app-region: no-drag !important;
 }
 
 
