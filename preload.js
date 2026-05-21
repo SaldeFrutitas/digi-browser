@@ -11,6 +11,21 @@ contextBridge.exposeInMainWorld('browserAPI', {
   windowMaximize: () => ipcRenderer.send('window-maximize'),
   windowClose:    () => ipcRenderer.send('window-close'),
 
+  // INICIO DE API PARA PERSISTENCIA DE PESTANAS
+  loadTabsSession: () => ipcRenderer.invoke('tabs-session-load'),
+
+  saveTabsSession: (sessionData) => {
+    if (
+      !sessionData ||
+      !Array.isArray(sessionData.tabs)
+    ) {
+      return;
+    }
+
+    ipcRenderer.send('tabs-session-save', sessionData);
+  },
+  // FIN DE API PARA PERSISTENCIA DE PESTANAS
+
   //  Validate input before sending to main process
   navigate: (url) => {
     if (typeof url !== 'string') return;

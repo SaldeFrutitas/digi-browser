@@ -749,8 +749,20 @@
     background-color: color-mix(in oklab, #868686 50%, transparent);
   }
 }
+#favorites-container {
+  flex: 0 0 auto;
+  border: 1px solid rgba(94, 94, 94, 0.18);
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 4px;
+  padding-right: 2px;
+}
+#favorites-container:empty {
+  display: none;
+}
 #tabs-container {
   flex: 0 1 auto;
+  min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 2px;
@@ -771,18 +783,43 @@
 .w-8 #tabs-container::-webkit-scrollbar {
   display: none;
 }
+.w-8 #favorites-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.w-8 #favorites-container .favorite-item {
+  display: flex;
+  justify-content: center;
+}
 #new-tab-btn {
   margin-bottom: 8px;
 }
+.split-view-active {
+  background-color: rgba(248, 59, 102, 0.12) !important;
+  color: #F83B66 !important;
+}
+#webviews-container.is-split-view {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 4px;
+}
+#webviews-container.is-split-view > div {
+  min-width: 0;
+  min-height: 0;
+}
 #sidebar-hover-zone {
   width: 10px !important;
+}
+#sidebar {
+  margin-right: calc(var(--spacing) * 1) !important;
 }
 .is-floating {
   left: -2px !important;
   top: 2px !important;
   height: 99% !important;
   border-radius: 12px !important;
-  background-color: rgba(255, 255, 255, 0.76) !important;
+  background-color: rgba(255, 255, 255, 0.777) !important;
   backdrop-filter: blur(8px) !important;
   -webkit-backdrop-filter: blur(8px) !important;
   border-top: none !important;
@@ -791,6 +828,126 @@
   box-shadow: 4px 0 5px rgba(0, 0, 0, 0.08) !important;
   -webkit-app-region: no-drag !important;
 }
+/* INICIO DE DROPDOWN DE PESTANAS */
+.tab-context-menu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 170px;
+  padding: 6px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.777);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 4px 0 5px rgba(0, 0, 0, 0.08);
+  -webkit-app-region: no-drag;
+}
+.tab-context-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: transparent;
+  -webkit-app-region: no-drag;
+}
+.tab-context-backdrop.hidden {
+  display: none;
+}
+.tab-context-menu.hidden {
+  display: none;
+}
+.tab-context-menu-item {
+  width: 100%;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 9px;
+  color: #36252D;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease, opacity 150ms ease;
+}
+.tab-context-menu-item:hover:not(:disabled) {
+  background-color: rgba(134, 134, 134, 0.1);
+  color: #F83B66;
+}
+.tab-context-menu-item:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.tab-context-menu-item svg {
+  flex: 0 0 auto;
+}
+.split-picker-menu {
+  max-width: 240px;
+}
+.split-picker-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.split-picker-favicon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+.tab.is-pinned {
+  border-color: rgba(248, 59, 102, 0.24) !important;
+}
+.tab.is-favorite {
+  border-color: rgba(255, 207, 218, 0.24) !important;
+  background-color: rgba(255, 255, 255, 0.56) !important;
+}
+.tab.is-pinned .close-tab,
+.tab.is-favorite .close-tab {
+  display: none;
+}
+.tab.is-pinned:not(.is-favorite)::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 9999px;
+  background-color: #F83B66;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+.tab.is-pinned.is-favorite::after {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 10px;
+  background-color: #F83B66;
+  position: absolute;
+  top: 8px;
+  right: 19px;
+}
+.tab.is-favorite::before {
+  content: "\2605";
+  position: absolute;
+  top: 2px;
+  right: 5px;
+  color: #F83B66;
+  font-size: 10px;
+  line-height: 1;
+}
+.w-8 .tab.is-pinned:not(.is-favorite)::after {
+  top: 4px;
+  right: 3px;
+}
+.w-8 .tab.is-pinned.is-favorite::after {
+  top: 7px;
+  right: 15px;
+}
+.w-8 .tab.is-favorite::before {
+  top: 1px;
+  right: 2px;
+}
+/* FIN DE DROPDOWN DE PESTANAS */
 @property --tw-rotate-x {
   syntax: "*";
   inherits: false;

@@ -8,6 +8,83 @@ const WEB_PARTITION = 'persist:webcontent';
 let mainWindow;
 let view;
 
+// INICIO DE PERSISTENCIA DE PESTANAS
+function getTabsSessionPath() {
+  return path.join(app.getPath('userData'), 'tabs-session.json');
+}
+
+function normalizeTabsSession(sessionData) {
+  if (
+    !sessionData ||
+    !Array.isArray(sessionData.tabs)
+  ) {
+    return null;
+  }
+
+  const tabs = sessionData.tabs
+    .map(tab => ({
+      url: typeof tab.url === 'string' ? sanitizeUrl(tab.url) : null,
+      title: typeof tab.title === 'string' && tab.title.trim()
+        ? tab.title.slice(0, 300)
+        : 'New Tab',
+      favicon: typeof tab.favicon === 'string' && tab.favicon.length < 4096
+        ? tab.favicon
+        : '',
+      pinned: Boolean(tab.pinned),
+      favorite: Boolean(tab.favorite)
+    }))
+    .filter(tab => tab.url);
+
+  if (tabs.length === 0) {
+    return null;
+  }
+
+  return {
+    activeIndex: Number.isInteger(sessionData.activeIndex)
+      ? Math.max(0, Math.min(sessionData.activeIndex, tabs.length - 1))
+      : 0,
+    tabs
+  };
+}
+
+function loadTabsSession() {
+  try {
+    const sessionPath = getTabsSessionPath();
+
+    if (!fs.existsSync(sessionPath)) {
+      return null;
+    }
+
+    const rawSession = fs.readFileSync(sessionPath, 'utf8');
+    return normalizeTabsSession(JSON.parse(rawSession));
+  }
+  catch (err) {
+    console.error('Failed to load tabs session', err);
+    return null;
+  }
+}
+
+function saveTabsSession(sessionData) {
+  try {
+    const session = normalizeTabsSession(sessionData);
+
+    if (!session) {
+      return;
+    }
+
+    fs.writeFileSync(
+      getTabsSessionPath(),
+      JSON.stringify(session, null, 2),
+      'utf8'
+    );
+  }
+  catch (err) {
+    console.error('Failed to save tabs session', err);
+  }
+}
+
+// FIN DE PERSISTENCIA DE PESTANAS
+
 // ─── URL Sanitization & Security ───────────────────────────────────────────────
 const BLOCKED_PROTOCOLS = ['file:', 'javascript:', 'data:', 'vbscript:', 'about:'];
 
@@ -137,6 +214,14 @@ ipcMain.on('window-close', () => {
     mainWindow.close();
   }
 });
+
+// INICIO DE IPC PARA PERSISTENCIA DE PESTANAS
+ipcMain.handle('tabs-session-load', () => loadTabsSession());
+
+ipcMain.on('tabs-session-save', (_event, sessionData) => {
+  saveTabsSession(sessionData);
+});
+// FIN DE IPC PARA PERSISTENCIA DE PESTANAS
 
 app.whenReady().then(createWindow);
 app.on('window-all-closed', () => process.platform !== 'darwin' && app.quit());
