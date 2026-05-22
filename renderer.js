@@ -345,6 +345,12 @@ const DEFAULT_FAVICON =
   '<path d="M12 2a15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10"></path>' +
   '</svg>';
 
+const LOADING_FAVICON =
+  'data:image/svg+xml;utf8,' +
+  '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%23F83B66" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">' +
+  '<path d="M21 12a9 9 0 1 1-6.219-8.56"></path>' +
+  '</svg>';
+
 // INICIO DE PERSISTENCIA DE PESTANAS
 const DEFAULT_TAB_URL = 'https://www.digiapps.com.co';
 const FAVORITES_STORAGE_KEY = 'digi-browser:favorites';
@@ -397,7 +403,7 @@ function getValidTabSession(session) {
       title: typeof tab.title === 'string' && tab.title.trim()
         ? tab.title
         : 'New Tab',
-      favicon: typeof tab.favicon === 'string' && tab.favicon.trim()
+      favicon: typeof tab.favicon === 'string' && tab.favicon.trim() && tab.favicon !== LOADING_FAVICON
         ? tab.favicon
         : DEFAULT_FAVICON,
       pinned: Boolean(tab.pinned) && !Boolean(tab.favorite),
@@ -494,7 +500,9 @@ function setupWebviewEvents(tab) {
 
     tab.url = e.url;
 
-    tab.faviconImg.src = DEFAULT_FAVICON;
+    tab.hasCustomFavicon = false;
+    tab.faviconImg.src = LOADING_FAVICON;
+    tab.faviconImg.classList.add('loading-favicon');
 
     saveTabSession();
 
@@ -544,12 +552,74 @@ function setupWebviewEvents(tab) {
     hideTabContextMenu();
 
     tab.tabLoadingBorder.style.display = 'block';
+    if (tab.pageLoadingBorder) {
+      tab.pageLoadingBorder.style.display = 'block';
+    }
+
+    tab.hasCustomFavicon = false;
+    tab.faviconImg.src = LOADING_FAVICON;
+    tab.faviconImg.classList.add('loading-favicon');
 
   });
 
   wv.addEventListener('did-stop-loading', () => {
 
     tab.tabLoadingBorder.style.display = 'none';
+    if (tab.pageLoadingBorder) {
+      tab.pageLoadingBorder.style.display = 'none';
+    }
+
+    tab.faviconImg.classList.remove('loading-favicon');
+
+    if (!tab.hasCustomFavicon) {
+
+      // Intentar obtener favicon via Google Favicon API como fallback
+      try {
+
+        const tabUrl = tab.url || wv.getURL?.() || '';
+        const urlObj = new URL(tabUrl);
+
+        if (
+          urlObj.protocol === 'http:' ||
+          urlObj.protocol === 'https:'
+        ) {
+
+          const fallbackSrc =
+            'https://www.google.com/s2/favicons?sz=32&domain_url=' +
+            encodeURIComponent(urlObj.origin);
+
+          const testImg = new Image();
+
+          testImg.onload = () => {
+            if (!tab.hasCustomFavicon) {
+              tab.faviconImg.src = fallbackSrc;
+              tab.hasCustomFavicon = true;
+              updateTabStateStyles(tab);
+              saveTabSession();
+            }
+          };
+
+          testImg.onerror = () => {
+            if (!tab.hasCustomFavicon) {
+              tab.faviconImg.src = DEFAULT_FAVICON;
+            }
+          };
+
+          testImg.src = fallbackSrc;
+
+        } else {
+
+          tab.faviconImg.src = DEFAULT_FAVICON;
+
+        }
+
+      } catch {
+
+        tab.faviconImg.src = DEFAULT_FAVICON;
+
+      }
+
+    }
 
   });
 
@@ -579,6 +649,8 @@ function setupWebviewEvents(tab) {
     ) {
 
       tab.faviconImg.src = e.favicons[0];
+      tab.hasCustomFavicon = true;
+      tab.faviconImg.classList.remove('loading-favicon');
 
       updateTabStateStyles(tab);
       saveTabSession();
@@ -1254,37 +1326,14 @@ function createTab(
   // LOADING BORDER ANIMATION
 
   const tabLoadingBorder = document.createElement('div');
-
-  tabLoadingBorder.className =
-    'absolute inset-0 rounded-xl pointer-events-none overflow-hidden';
-
+  tabLoadingBorder.className = 'loading-border-container rounded-xl';
   tabLoadingBorder.style.display = 'none';
 
-  // Create the rotating gradient border effect
-  const gradientRing = document.createElement('div');
-  gradientRing.className = 'absolute inset-0 rounded-xl';
-  gradientRing.style.background = 'conic-gradient(from 0deg, transparent, #F83B66, transparent, #0A77F3, transparent)';
-  gradientRing.style.animation = 'spin 1.5s linear infinite';
-  gradientRing.style.padding = '2px';
-  gradientRing.style.mask = 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)';
-  gradientRing.style.maskComposite = 'exclude';
-  gradientRing.style.webkitMaskComposite = 'xor';
+  const tabGradientRing = document.createElement('div');
+  tabGradientRing.className = 'loading-gradient-ring';
 
-  tabLoadingBorder.appendChild(gradientRing);
+  tabLoadingBorder.appendChild(tabGradientRing);
   tabEl.appendChild(tabLoadingBorder);
-
-  // Add CSS animation for spinning effect
-  if (!document.getElementById('loading-border-style')) {
-    const style = document.createElement('style');
-    style.id = 'loading-border-style';
-    style.textContent = `
-      @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-      }
-    `;
-    document.head.appendChild(style);
-  }
 
   tabEl.addEventListener('click', () => {
 
@@ -1303,6 +1352,17 @@ function createTab(
 
   wrapperEl.className =
     'w-full h-full rounded-2xl overflow-hidden border-[2px] border-[#868686]/10 bg-[#f5f5f5] relative isolate hidden';
+
+  // PAGE LOADING BORDER ANIMATION
+  const pageLoadingBorder = document.createElement('div');
+  pageLoadingBorder.className = 'loading-border-container rounded-2xl';
+  pageLoadingBorder.style.display = 'none';
+
+  const pageGradientRing = document.createElement('div');
+  pageGradientRing.className = 'loading-gradient-ring';
+
+  pageLoadingBorder.appendChild(pageGradientRing);
+  wrapperEl.appendChild(pageLoadingBorder);
 
   const webviewEl = document.createElement('webview');
 
@@ -1329,11 +1389,13 @@ function createTab(
     faviconImg,
     titleSpan,
     tabLoadingBorder,
+    pageLoadingBorder,
     wrapperEl,
     webviewEl,
     url,
     pinned: Boolean(options.pinned),
-    favorite: Boolean(options.favorite) || isFavoriteUrl(url)
+    favorite: Boolean(options.favorite) || isFavoriteUrl(url),
+    hasCustomFavicon: Boolean(options.favicon && options.favicon !== DEFAULT_FAVICON)
   };
 
   tabs.push(tabObj);

@@ -193,9 +193,6 @@
   .relative {
     position: relative;
   }
-  .inset-0 {
-    inset: calc(var(--spacing) * 0);
-  }
   .start {
     inset-inline-start: var(--spacing);
   }
@@ -783,7 +780,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 4px;
 }
-#webviews-container.is-split-view > div {
+#webviews-container.is-split-view>div {
   min-width: 0;
   min-height: 0;
 }
@@ -797,6 +794,8 @@
   left: -2px !important;
   top: 2px !important;
   height: 99% !important;
+  padding-left: 4px !important;
+  padding-right: 4px !important;
   border-radius: 12px !important;
   background-color: rgba(255, 255, 255, 0.777) !important;
   backdrop-filter: blur(8px) !important;
@@ -877,8 +876,18 @@
   border-color: rgba(248, 59, 102, 0.24) !important;
 }
 .tab.is-favorite {
-  border-color: rgba(248, 59, 102, 0.24) !important;
-  background-color: rgba(255, 255, 255, 0.56) !important;
+  border-color: rgba(255, 255, 255, 0.24) !important;
+  background-color: rgba(238, 238, 238, 0.979) !important;
+}
+.tab.is-favorite:hover {
+  background-color: rgba(223, 223, 223, 0.863) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.2) !important;
+}
+.tab.is-favorite.active {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(248, 59, 102, 0.45) !important;
+  box-shadow: 0 0 0 1px rgba(255, 88, 127, 0.25) !important;
 }
 .tab.is-pinned .close-tab, .tab.is-favorite .close-tab {
   display: none;
@@ -923,6 +932,38 @@
 .w-8 .tab.is-favorite::before {
   top: 1px;
   right: 2px;
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+.loading-border-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  padding: 1.5px;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  filter: drop-shadow(0 0 6px rgba(248, 59, 102, 0.8)) drop-shadow(0 0 6px rgba(10, 119, 243, 0.8)) drop-shadow(0 0 6px rgba(7, 203, 125, 0.8)) drop-shadow(0 0 6px rgba(7, 203, 180, 0.8)) drop-shadow(0 0 6px rgba(255, 197, 6, 0.8)) drop-shadow(0 0 6px rgba(255, 36, 44, 0.8));
+  z-index: 45;
+}
+.loading-gradient-ring {
+  position: absolute;
+  width: 300%;
+  height: 300%;
+  top: -100%;
+  left: -100%;
+  background: conic-gradient(from 0deg, transparent 0%, #F83B66 16%, #0A77F3 32%, #07CB7D 48%, #07CBB4 64%, #FFC506 80%, #FF242C 90%, transparent 100%);
+  animation: spin 2s linear infinite;
+}
+.loading-favicon {
+  animation: spin 1s linear infinite !important;
 }
 @property --tw-rotate-x {
   syntax: "*";
@@ -1129,6 +1170,11 @@
   syntax: "*";
   inherits: false;
   initial-value: 1;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 @layer properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
