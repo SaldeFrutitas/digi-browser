@@ -325,7 +325,12 @@ addressInput.addEventListener('keydown', (e) => {
 
   if (activeTab) {
 
-    activeTab.webviewEl.loadURL(safe);
+    // Si la pestaña actual es un favorito, abrir en nueva pestaña
+    if (activeTab.favorite) {
+      createTab(safe);
+    } else {
+      activeTab.webviewEl.loadURL(safe);
+    }
 
   }
 
