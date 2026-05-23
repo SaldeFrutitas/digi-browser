@@ -325,6 +325,9 @@
   .cursor-pointer {
     cursor: pointer;
   }
+  .resize {
+    resize: both;
+  }
   .flex-col {
     flex-direction: column;
   }
@@ -523,6 +526,10 @@
   .shadow-\[4px_0_24px_rgba\(0\,0\,0\,0\.12\)\] {
     --tw-shadow: 4px 0 24px var(--tw-shadow-color, rgba(0,0,0,0.12));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  }
+  .outline {
+    outline-style: var(--tw-outline-style);
+    outline-width: 1px;
   }
   .blur {
     --tw-blur: blur(8px);
@@ -781,14 +788,13 @@
   background-color: rgba(248, 59, 102, 0.12) !important;
   color: #F83B66 !important;
 }
-
 #webviews-container.is-split-view {
   position: relative;
   display: flex !important;
   flex-direction: row;
   overflow: visible;
   gap: 4px;
-  padding:6px 10px 6px 8px;
+  padding: 6px 10px 6px 8px;
 }
 #webviews-container.is-split-view > div:not(#split-divider) {
   min-width: 0;
@@ -808,7 +814,7 @@
   justify-content: center;
   z-index: 9999;
   will-change: left;
-  transition: left 0ms; /* instantáneo por defecto */
+  transition: left 0ms;
 }
 .split-divider::before {
   content: '';
@@ -823,7 +829,7 @@
   transition: background 200ms ease, width 200ms ease;
 }
 .split-divider:not(.dragging) {
-  transition: left 120ms ease; /* suave solo al posicionar inicialmente */
+  transition: left 120ms ease;
 }
 .split-divider-handle {
   position: absolute;
@@ -1127,6 +1133,11 @@
   inherits: false;
   initial-value: 0 0 #0000;
 }
+@property --tw-outline-style {
+  syntax: "*";
+  inherits: false;
+  initial-value: solid;
+}
 @property --tw-blur {
   syntax: "*";
   inherits: false;
@@ -1268,6 +1279,7 @@
       --tw-ring-offset-width: 0px;
       --tw-ring-offset-color: #fff;
       --tw-ring-offset-shadow: 0 0 #0000;
+      --tw-outline-style: solid;
       --tw-blur: initial;
       --tw-brightness: initial;
       --tw-contrast: initial;
