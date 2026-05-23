@@ -22,9 +22,13 @@ const textMeasurer = document.getElementById('text-measurer');
 
 let tabs = [];
 let activeTabId = null;
+let focusedTabId = null; // en split view, el panel que tiene el foco (puede diferir de activeTabId)
 let currentUrl = 'https://www.google.com/';
 let isSplitView = false;
 let splitSecondaryTabId = null;
+let splitDivider = null;
+let isResizing = false;
+let splitPrimaryWidth = 50; // porcentaje del ancho total
 
 // ─────────────────────────────────────────────
 // URL SANITIZATION
@@ -181,6 +185,52 @@ function syncUrl(url) {
 
 }
 
+// Actualiza la address bar si el tab tiene el foco en este momento
+// En split view: cualquiera de los dos paneles puede tener el foco
+// Fuera de split view: solo el tab activo
+function shouldSyncUrl(tabId) {
+
+  if (!isSplitView) {
+    return tabId === activeTabId;
+  }
+
+  return tabId === focusedTabId;
+
+}
+
+function setFocusedTab(tabId) {
+
+  if (focusedTabId === tabId) {
+    return;
+  }
+
+  focusedTabId = tabId;
+
+  // Actualizar borde visual del panel enfocado
+  tabs.forEach(tab => {
+
+    const isFocused = tab.id === tabId;
+    const isInSplit =
+      tab.id === activeTabId ||
+      tab.id === splitSecondaryTabId;
+
+    if (isInSplit) {
+      tab.wrapperEl.style.outline = isFocused
+        ? '2px solid rgba(248, 59, 102, 0.5)'
+        : '';
+    }
+
+  });
+
+  // Mostrar la url del panel enfocado
+  const focusedTab = getTabById(tabId);
+
+  if (focusedTab?.url) {
+    syncUrl(focusedTab.url);
+  }
+
+}
+
 // ─────────────────────────────────────────────
 // NAVIGATION
 // ─────────────────────────────────────────────
@@ -321,15 +371,18 @@ addressInput.addEventListener('keydown', (e) => {
 
   }
 
-  const activeTab = getActiveTab();
+  // En split view navegar en el panel que tiene el foco, no siempre el primario
+  const targetTab = (isSplitView && focusedTabId)
+    ? getTabById(focusedTabId)
+    : getActiveTab();
 
-  if (activeTab) {
+  if (targetTab) {
 
     // Si la pestaña actual es un favorito, abrir en nueva pestaña
-    if (activeTab.favorite) {
+    if (targetTab.favorite) {
       createTab(safe);
     } else {
-      activeTab.webviewEl.loadURL(safe);
+      targetTab.webviewEl.loadURL(safe);
     }
 
   }
@@ -511,10 +564,8 @@ function setupWebviewEvents(tab) {
 
     saveTabSession();
 
-    if (tab.id === activeTabId) {
-
+    if (shouldSyncUrl(tab.id)) {
       syncUrl(e.url);
-
     }
 
   });
@@ -525,10 +576,8 @@ function setupWebviewEvents(tab) {
 
     saveTabSession();
 
-    if (tab.id === activeTabId) {
-
+    if (shouldSyncUrl(tab.id)) {
       syncUrl(e.url);
-
     }
 
   });
@@ -543,10 +592,8 @@ function setupWebviewEvents(tab) {
 
     saveTabSession();
 
-    if (tab.id === activeTabId) {
-
+    if (shouldSyncUrl(tab.id)) {
       syncUrl(e.url);
-
     }
 
   });
@@ -675,6 +722,25 @@ function setupWebviewEvents(tab) {
 
   });
 
+  // DETECCION DE FOCO EN SPLIT VIEW
+  // El webview emite 'focus' cuando el usuario hace click dentro de el
+  wv.addEventListener('focus', () => {
+
+    if (isSplitView) {
+      setFocusedTab(tab.id);
+    }
+
+  });
+
+  // Capturar click en el wrapper también (cubre el borde y áreas no-webview)
+  tab.wrapperEl.addEventListener('pointerdown', () => {
+
+    if (isSplitView) {
+      setFocusedTab(tab.id);
+    }
+
+  });
+
 }
 
 // INICIO DE MENU CONTEXTUAL DE PESTANAS
@@ -740,6 +806,109 @@ function updateSplitViewButtonState() {
 
 }
 
+function createSplitDivider() {
+
+  if (splitDivider) {
+    return splitDivider;
+  }
+
+  const divider = document.createElement('div');
+
+  divider.id = 'split-divider';
+  divider.className = 'split-divider';
+
+  divider.innerHTML = `
+    <div class="split-divider-handle">
+      <div class="split-divider-dot"></div>
+      <div class="split-divider-dot"></div>
+      <div class="split-divider-dot"></div>
+    </div>
+  `;
+
+  divider.addEventListener('pointerdown', (e) => {
+
+    e.preventDefault();
+
+    isResizing = true;
+
+    const startX = e.clientX;
+    const startPercent = splitPrimaryWidth;
+
+    // ← capturar rect UNA sola vez al inicio del drag
+    const containerRect = webviewsContainer.getBoundingClientRect();
+
+    divider.classList.add('dragging');
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+
+    // MUY IMPORTANTE EN ELECTRON: deshabilitar pointer events en webviews
+    tabs.forEach(tab => {
+      tab.webviewEl.style.pointerEvents = 'none';
+    });
+
+    const onPointerMove = (e) => {
+
+      if (!isResizing) {
+        return;
+      }
+
+      const delta = e.clientX - startX;
+      const deltaPercent = (delta / containerRect.width) * 100;
+
+      let next = startPercent + deltaPercent;
+      next = Math.max(15, Math.min(85, next));
+
+      splitPrimaryWidth = next;
+      updateSplitViewWidths();
+
+    };
+
+    const stopResize = () => {
+
+      isResizing = false;
+
+      divider.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+
+      tabs.forEach(tab => {
+        tab.webviewEl.style.pointerEvents = '';
+      });
+
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', stopResize);
+
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', stopResize);
+
+  });
+
+  return divider;
+
+}
+
+function updateSplitViewWidths() {
+
+  const primary = tabs.find(tab => tab.id === activeTabId);
+  const secondary = tabs.find(tab => tab.id === splitSecondaryTabId);
+
+  if (!primary || !secondary) {
+    return;
+  }
+
+  primary.wrapperEl.style.width = `${splitPrimaryWidth}%`;
+  secondary.wrapperEl.style.width = `${100 - splitPrimaryWidth}%`;
+
+  if (splitDivider) {
+    // Usar left en vez de translateX para posicionamiento absoluto confiable
+    splitDivider.style.left = `calc(${splitPrimaryWidth}% - 4px)`;
+    splitDivider.style.transform = '';
+  }
+
+}
+
 function updateVisibleWebviews() {
 
   let secondaryTab = null;
@@ -759,10 +928,8 @@ function updateVisibleWebviews() {
     }
 
     if (!secondaryTab) {
-
       isSplitView = false;
       splitSecondaryTabId = null;
-
     }
 
   }
@@ -772,9 +939,29 @@ function updateVisibleWebviews() {
     Boolean(isSplitView && secondaryTab)
   );
 
+  // DIVIDER
+  if (isSplitView && secondaryTab) {
+
+    if (!splitDivider) {
+      splitDivider = createSplitDivider();
+      webviewsContainer.appendChild(splitDivider);
+    }
+
+    splitDivider.style.display = 'flex';
+
+  } else {
+
+    if (splitDivider) {
+      splitDivider.style.display = 'none';
+    }
+
+  }
+
+  // WEBVIEWS
   tabs.forEach(tab => {
 
     const isPrimary = tab.id === activeTabId;
+
     const isSecondary =
       Boolean(isSplitView && secondaryTab) &&
       tab.id === secondaryTab.id;
@@ -794,7 +981,35 @@ function updateVisibleWebviews() {
       isSecondary
     );
 
+    // RESET NORMAL VIEW
+    if (!isSplitView) {
+      tab.wrapperEl.style.flex = '';
+      tab.wrapperEl.style.width = '';
+    } else {
+      tab.wrapperEl.style.flex = 'none';
+    }
+
   });
+
+  // REORDENAR EN EL DOM: primario siempre a la izquierda, secundario a la derecha
+  // Sin esto el orden de creación de tabs determina el orden visual, invirtiendo el resize
+  if (isSplitView && secondaryTab) {
+
+    const primaryTab = tabs.find(tab => tab.id === activeTabId);
+
+    if (primaryTab) {
+      // Insertar primario antes que el divider (o al inicio si no hay divider aún)
+      webviewsContainer.insertBefore(primaryTab.wrapperEl, webviewsContainer.firstChild);
+      // Insertar secundario después del primario pero antes del divider
+      primaryTab.wrapperEl.after(secondaryTab.wrapperEl);
+    }
+
+  }
+
+  // ACTUALIZAR TAMAÑOS
+  if (isSplitView && secondaryTab) {
+    updateSplitViewWidths();
+  }
 
   updateSplitViewButtonState();
 
@@ -803,12 +1018,15 @@ function updateVisibleWebviews() {
 function toggleSplitView() {
 
   if (isSplitView) {
-
     isSplitView = false;
     splitSecondaryTabId = null;
+    focusedTabId = activeTabId;
+    // Limpiar outlines de foco
+    tabs.forEach(tab => {
+      tab.wrapperEl.style.outline = '';
+    });
     updateVisibleWebviews();
     return;
-
   }
 
   if (!activeTabId) {
@@ -824,9 +1042,7 @@ function toggleSplitView() {
 
     splitSecondaryTabId = newTab.id;
 
-  }
-
-  else {
+  } else {
 
     showSplitPicker();
     return;
@@ -973,9 +1189,7 @@ function orderTabsForPinnedState(tab) {
 
     tabs.splice(nextIndex, 0, tab);
 
-  }
-
-  else {
+  } else {
 
     const lastPinnedIndex = tabs.reduce(
       (lastIndex, item, index) => item.pinned ? index : lastIndex,
@@ -1027,9 +1241,7 @@ function getSavedFavorites() {
 
     return Array.isArray(favorites) ? favorites : [];
 
-  }
-
-  catch {
+  } catch {
     return [];
   }
 
@@ -1061,8 +1273,7 @@ function saveFavoriteTab(tabId) {
 
   if (existingIndex === -1) {
     favorites.push(favorite);
-  }
-  else {
+  } else {
     favorites[existingIndex] = favorite;
   }
 
@@ -1157,21 +1368,15 @@ function createTabContextMenu() {
 
     if (action === 'pin') {
       togglePinnedTab(contextMenuTabId);
-    }
-
-    else if (action === 'duplicate') {
+    } else if (action === 'duplicate') {
       duplicateTab(contextMenuTabId);
-    }
-
-    else if (action === 'favorite') {
+    } else if (action === 'favorite') {
 
       const tab = getTabById(contextMenuTabId);
 
       if (tab?.favorite) {
         removeFavoriteTab(contextMenuTabId);
-      }
-
-      else {
+      } else {
         saveFavoriteTab(contextMenuTabId);
       }
 
@@ -1421,8 +1626,7 @@ function createTab(
 
   if (options.activate !== false) {
     switchTab(tabId);
-  }
-  else {
+  } else {
     saveTabSession();
   }
 
@@ -1443,6 +1647,7 @@ function switchTab(tabId) {
   const previousActiveTabId = activeTabId;
 
   activeTabId = tabId;
+  focusedTabId = tabId; // al cambiar de tab activo, el foco va al primario
 
   if (
     isSplitView &&
@@ -1511,11 +1716,8 @@ function closeTab(tabId) {
   }
 
   if (tabs.length === 0) {
-
     createTab();
-
     return;
-
   }
 
   const nextIndex = Math.min(
@@ -1563,9 +1765,7 @@ function applySidebarState(state) {
       'ml-1'
     );
 
-  }
-
-  else if (state === 'icons-only') {
+  } else if (state === 'icons-only') {
 
     sidebar.classList.add(
       'w-8',
@@ -1574,9 +1774,7 @@ function applySidebarState(state) {
       'ml-1'
     );
 
-  }
-
-  else {
+  } else {
 
     sidebar.classList.add(
       'w-0',
@@ -1592,105 +1790,46 @@ function applySidebarState(state) {
     state !== 'hidden'
   );
 
-  const iconsOnly =
-    state === 'icons-only';
+  const iconsOnly = state === 'icons-only';
 
   sidebar.querySelectorAll(
     '.tab-title, .close-tab'
   ).forEach(el => {
-
-    el.classList.toggle(
-      'hidden',
-      iconsOnly
-    );
-
+    el.classList.toggle('hidden', iconsOnly);
   });
 
   sidebar.querySelectorAll('.tab').forEach(tab => {
 
-    tab.classList.toggle(
-      'justify-center',
-      iconsOnly
-    );
-
-    tab.classList.toggle(
-      'p-1',
-      iconsOnly
-    );
-
-    tab.classList.toggle(
-      'w-8',
-      iconsOnly
-    );
-
-    tab.classList.toggle(
-      'h-8',
-      iconsOnly
-    );
-
+    tab.classList.toggle('justify-center', iconsOnly);
+    tab.classList.toggle('p-1', iconsOnly);
+    tab.classList.toggle('w-8', iconsOnly);
+    tab.classList.toggle('h-8', iconsOnly);
 
     const img = tab.querySelector('img');
 
     if (img) {
-
-      img.classList.toggle(
-        'ml-0',
-        iconsOnly
-      );
-
+      img.classList.toggle('ml-0', iconsOnly);
     }
 
   });
 
-  const newTabSpan =
-    newTabBtn.querySelector('span');
+  const newTabSpan = newTabBtn.querySelector('span');
 
-  newTabSpan?.classList.toggle(
-    'hidden',
-    iconsOnly
-  );
+  newTabSpan?.classList.toggle('hidden', iconsOnly);
 
-  newTabBtn.classList.toggle(
-    'justify-center',
-    iconsOnly
-  );
-
-  newTabBtn.classList.toggle(
-    'p-1',
-    iconsOnly
-  );
-
-  newTabBtn.classList.toggle(
-    'w-8',
-    iconsOnly
-  );
-
-  newTabBtn.classList.toggle(
-    'h-8',
-    iconsOnly
-  );
+  newTabBtn.classList.toggle('justify-center', iconsOnly);
+  newTabBtn.classList.toggle('p-1', iconsOnly);
+  newTabBtn.classList.toggle('w-8', iconsOnly);
+  newTabBtn.classList.toggle('h-8', iconsOnly);
 
   if (toggleSidebarIcon) {
 
     if (state === 'expanded') {
-
-      toggleSidebarIcon.style.transform =
-        'rotate(0deg)';
-
-    }
-
-    else if (state === 'icons-only') {
-
-      toggleSidebarIcon.style.transform =
-        'rotate(-90deg)';
-
-    }
-
-    else {
-
-      toggleSidebarIcon.style.transform =
-        'rotate(180deg)';
-
+      toggleSidebarIcon.style.transform = 'rotate(0deg)';
+    } else if (state === 'icons-only') {
+      toggleSidebarIcon.style.transform = 'rotate(-90deg)';
+    } else {
+      toggleSidebarIcon.style.transform = 'rotate(180deg)';
     }
 
   }
@@ -1736,17 +1875,11 @@ let closeTimeout = null;
 
 function closeFloatingSidebar() {
 
-  if (
-    !sidebar.classList.contains(
-      'is-floating'
-    )
-  ) {
+  if (!sidebar.classList.contains('is-floating')) {
     return;
   }
 
-  sidebar.classList.remove(
-    ...FLOATING_CLASSES
-  );
+  sidebar.classList.remove(...FLOATING_CLASSES);
 
   sidebar.classList.add(
     'w-0',
@@ -1769,17 +1902,14 @@ function closeFloatingSidebar() {
 
 hoverZone?.addEventListener('mouseenter', () => {
 
-  if (
-    SIDEBAR_STATES[currentSidebarState] !==
-    'hidden'
-  ) {
+  if (SIDEBAR_STATES[currentSidebarState] !== 'hidden') {
     return;
   }
 
   if (floatingTimeout) {
     clearTimeout(floatingTimeout);
   }
-  
+
   if (closeTimeout) {
     clearTimeout(closeTimeout);
   }
@@ -1791,9 +1921,7 @@ hoverZone?.addEventListener('mouseenter', () => {
     'pointer-events-none'
   );
 
-  sidebar.classList.add(
-    ...FLOATING_CLASSES
-  );
+  sidebar.classList.add(...FLOATING_CLASSES);
 
   // Close sidebar if mouse doesn't enter it within 800ms
   floatingTimeout = setTimeout(() => {
@@ -1804,11 +1932,7 @@ hoverZone?.addEventListener('mouseenter', () => {
 
 sidebar?.addEventListener('mouseenter', () => {
 
-  if (
-    !sidebar.classList.contains(
-      'is-floating'
-    )
-  ) {
+  if (!sidebar.classList.contains('is-floating')) {
     return;
   }
 
@@ -1827,11 +1951,7 @@ sidebar?.addEventListener('mouseenter', () => {
 
 sidebar?.addEventListener('mouseleave', () => {
 
-  if (
-    !sidebar.classList.contains(
-      'is-floating'
-    )
-  ) {
+  if (!sidebar.classList.contains('is-floating')) {
     return;
   }
 
@@ -1839,7 +1959,7 @@ sidebar?.addEventListener('mouseleave', () => {
   if (closeTimeout) {
     clearTimeout(closeTimeout);
   }
-  
+
   closeTimeout = setTimeout(() => {
     closeFloatingSidebar();
   }, 400);
@@ -1850,40 +1970,19 @@ sidebar?.addEventListener('mouseleave', () => {
 // WINDOW STATE
 // ─────────────────────────────────────────────
 
-if (
-  appContainer &&
-  window.browserAPI?.onWindowState
-) {
+if (appContainer && window.browserAPI?.onWindowState) {
 
-  window.browserAPI.onWindowState(
-    (state) => {
+  window.browserAPI.onWindowState((state) => {
 
-      if (state === 'maximized') {
-
-        appContainer.classList.remove(
-          'rounded-2xl'
-        );
-
-        appContainer.classList.add(
-          'rounded-none'
-        );
-
-      }
-
-      else {
-
-        appContainer.classList.remove(
-          'rounded-none'
-        );
-
-        appContainer.classList.add(
-          'rounded-2xl'
-        );
-
-      }
-
+    if (state === 'maximized') {
+      appContainer.classList.remove('rounded-2xl');
+      appContainer.classList.add('rounded-none');
+    } else {
+      appContainer.classList.remove('rounded-none');
+      appContainer.classList.add('rounded-2xl');
     }
-  );
+
+  });
 
 }
 
